@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  MANAGER
+  STAFF
+  CUSTOMER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String     @db.VarChar(100)
+  email        String     @unique @db.VarChar(255)
+  passwordHash String     @db.VarChar(255)
+  role         Role       @default(CUSTOMER)
+  cartItems    CartItem[]
+  bookings     Booking[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("users")
+}
+
+model Product {
+  id          String     @id @default(uuid())
+  name        String     @db.VarChar(150)
+  description String     @db.Text
+  price       Decimal    @db.Decimal(10, 2)
+  stock       Int        @default(0)
+  imageUrl    String?    @db.VarChar(500)
+  cartItems   CartItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("products")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  userId    String  
+  productId String  
+  quantity  Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  // one row per product per user; adding again increases quantity
+  @@unique([userId, productId])
+  @@map("cart_items")
+}
+
+model Booking {
+  id        String        @id @default(uuid())
+  userId    String       
+  status    BookingStatus @default(PENDING)
+  total     Decimal       @db.Decimal(12, 2)
+  user      User          @relation(fields: [userId], references: [id])
+  items     BookingItem[]
+  createdAt DateTime      @default(now())
+
+  @@map("bookings")
+}
+
+/// A line inside a booking. The product name and price are copied ("snapshot") at booking time,
+/// so old orders stay correct even if the product is edited or deleted later.
+model BookingItem {
+  id          String  @id @default(uuid())
+  bookingId   String 
+  productId   String?
+  productName String  @db.VarChar(150)
+  unitPrice   Decimal @db.Decimal(10, 2)
+  quantity    Int
+  booking     Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("booking_items")
+}

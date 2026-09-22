@@ -1,0 +1,19 @@
+# Optional: starts a MySQL database that matches backend/.env.example
+#   docker compose up -d
+services:
+  db:
+    image: mysql:8.4
+    container_name: deskshop-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: ecommerce
+      MYSQL_USER: shop
+      MYSQL_PASSWORD: shop123
+    ports:
+      - "3306:3306"
+    volumes:
+      - deskshop-data:/var/lib/mysql
+
+volumes:
+  deskshop-data:
