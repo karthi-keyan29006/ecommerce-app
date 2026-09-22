@@ -10,6 +10,36 @@ A layered (N-tier) e-commerce app with JWT authentication and role-based access 
 | ORM | Prisma |
 | Auth | JWT (`jsonwebtoken`) + bcrypt password hashing (`bcryptjs`) |
 
+## Quick start (submission checklist)
+
+```bash
+# 1. Database (pick one)
+docker compose up -d                      # Option A: Docker MySQL
+# OR create manually — see "Database" under Installation
+
+# 2. Backend
+cd backend
+npm install
+cp .env.example .env                      # Windows: copy .env.example .env
+npm run prisma:generate
+npm run db:push
+npm run seed                              # creates the test users below
+npm run dev                               # http://localhost:5000
+
+# 3. Frontend (new terminal)
+cd frontend
+npm install
+cp .env.example .env
+npm run dev                               # http://localhost:5173
+```
+
+| Item | Where |
+| --- | --- |
+| Environment variables | [`backend/.env.example`](backend/.env.example), [`frontend/.env.example`](frontend/.env.example) — full explanation in [§7](#7-installation-and-running) |
+| Database setup | [§7 Database](#7-installation-and-running) (Docker or manual MySQL) |
+| Run commands | [§7 Backend / Frontend](#7-installation-and-running) |
+| Test credentials (all roles) | [§8 Sample test users](#8-sample-test-users) |
+
 ## Table of contents
 
 1. [Architecture](#1-architecture)
